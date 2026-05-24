@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#111318">
+<title>NeroVoxx — Cloud Security Engineer</title>
+
+<!-- SEO -->
+<meta name="description" content="Cloud Security Engineer in training — 10+ years in engineering, now specializing in AWS, offensive security, and cloud-native defense. Portfolio launching January 2027.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://nerovoxx.com">
+
+<!-- Favicon (inline SVG — no external file needed) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><rect width='28' height='28' rx='4' fill='%23111318'/><path d='M14 5L7 8v5c0 4.1 3 7.9 7 9 4-1.1 7-4.9 7-9V8l-7-3z' stroke='%232aafaf' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/><path d='M11 14l2 2 4-4' stroke='%232aafaf' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+
+<!-- Open Graph (WhatsApp · LinkedIn · Slack previews) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nerovoxx.com">
+<meta property="og:title" content="NeroVoxx — Cloud Security Engineer">
+<meta property="og:description" content="10+ years in engineering. Now going deep on AWS, offensive security, and cloud-native defense. Portfolio launches January 2027.">
+<meta property="og:site_name" content="NeroVoxx">
+
+<!-- Twitter / X Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NeroVoxx — Cloud Security Engineer">
+<meta name="twitter:description" content="10+ years in engineering. Now going deep on AWS, offensive security, and cloud-native defense. Portfolio launches January 2027.">
+
+<!-- Preconnect: fonts + GSAP CDN (both needed before first render) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+<!-- Preload font CSS so font files start downloading earlier -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" as="style">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- PWA manifest -->
+<link rel="manifest" href="/manifest.json">
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" async></script>
+<style>
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+
+/* ── TOKENS ── */
+:root{
+  --ink:#e8e4dc;
+  --paper:#111318;
+  --s1:#e8824a;--s1a:rgba(232,130,74,.18);--s1b:rgba(232,130,74,.08);
+  --s2:#2aafaf;--s2a:rgba(42,175,175,.18);--s2b:rgba(42,175,175,.08);
+  --s3:#a870e8;--s3a:rgba(168,112,232,.18);--s3b:rgba(168,112,232,.08);
+  --s4:#5a9fd4;--s4a:rgba(90,159,212,.18);--s4b:rgba(90,159,212,.08);
+  --accent:#e8a070;
+  --rule:#2a2e38;
+  --muted:#7a8090;
+  --surface:#161a22;
+}
+
+/* ── BASE ── */
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  overflow-x:hidden;
+  display:flex;
+  flex-direction:column;
+  /* will-change on body is bad — keep off */
+}
+
+/* ── PERFORMANCE: disable heavy effects on low-end ── */
+/* Reduced-motion / low-end: glows are CSS-only, no JS animation on them */
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+/* ── NOISE — pure CSS, no JS, GPU-free ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:9000;
+  opacity:.3;
+  /* No animation — static noise is fine and free */
+}
+
+/* ── GLOWS — CSS only, will-change:transform so GPU-composited ── */
+.glow-1,.glow-2{
+  position:fixed;
+  border-radius:50%;
+  pointer-events:none;
+  will-change:transform;
+}
+.glow-1{
+  top:-160px;right:-160px;
+  width:520px;height:520px;
+  background:radial-gradient(circle,rgba(42,175,175,.13) 0%,transparent 65%);
+  animation:drift1 20s ease-in-out infinite alternate;
+}
+.glow-2{
+  bottom:-100px;left:5%;
+  width:420px;height:420px;
+  background:radial-gradient(circle,rgba(232,130,74,.10) 0%,transparent 65%);
+  animation:drift2 26s ease-in-out infinite alternate;
+}
+/* Removed glow-3 — 2 glows are enough, saves GPU on low-end */
+@keyframes drift1{from{transform:translate(0,0)}to{transform:translate(30px,22px)}}
+@keyframes drift2{from{transform:translate(0,0)}to{transform:translate(-22px,-28px)}}
+/* Shrink glows on mobile to reduce overdraw and GPU load */
+@media(max-width:599px){
+  .glow-1{width:260px;height:260px;top:-80px;right:-80px}
+  .glow-2{width:200px;height:200px}
+}
+
+/* ── GRID LINES — static, no animation ── */
+.grid-lines{
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:.022;
+  background-image:
+    linear-gradient(var(--ink) 1px,transparent 1px),
+    linear-gradient(90deg,var(--ink) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+/* ── PROGRESS LINE ── */
+.progress-line{
+  position:fixed;top:0;left:0;
+  height:3px;width:100%;
+  z-index:2000;
+  background:linear-gradient(90deg,var(--s2),var(--s4),var(--s3),var(--s1));
+  border-radius:0 2px 2px 0;
+  transform:scaleX(0);
+  transform-origin:left;
+  will-change:transform;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;
+  height:60px;
+  background:rgba(10,13,18,.93);
+  border-bottom:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  z-index:100;
+  /* backdrop-filter is expensive on low-end — only on desktop */
+}
+@media(min-width:600px){
+  nav{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:0 40px;}
+}
+
+.nav-logo{
+  display:flex;align-items:center;gap:9px;
+  font-family:'DM Mono',monospace;
+  font-size:11px;letter-spacing:.14em;
+  color:var(--accent);text-transform:uppercase;
+}
+.nav-logo span{color:var(--muted)}
+
+.nav-badge{
+  font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--s2);padding:4px 10px;
+  border:1px solid var(--s2);border-radius:2px;
+  background:var(--s2b);
+  animation:pulse-badge 3s ease-in-out infinite;
+  white-space:nowrap;
+}
+@keyframes pulse-badge{
+  0%,100%{box-shadow:0 0 0 0 var(--s2a)}
+  50%{box-shadow:0 0 10px 2px var(--s2a)}
+}
+
+/* ── MAIN ── */
+main{
+  flex:1;
+  display:flex;flex-direction:column;
+  align-items:flex-start;justify-content:center;
+  padding:80px 24px 72px;
+  position:relative;
+  min-height:100vh;
+  z-index:1;
+}
+@media(min-width:600px){main{padding:110px 40px 80px}}
+@media(min-width:900px){main{padding:120px 80px 80px}}
+
+/* ── HERO TYPE ── */
+.eyebrow{
+  font-family:'DM Mono',monospace;
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:22px;
+  opacity:0;/* GSAP start */
+}
+
+h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(34px,9vw,50px);
+  font-weight:900;line-height:1.06;
+  color:#fff;max-width:720px;
+  margin-bottom:0;
+  opacity:0;/* GSAP start */
+}
+h1 em{
+  font-style:normal;color:var(--s2);position:relative;
+}
+h1 em::after{
+  content:'';position:absolute;
+  bottom:3px;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--s2),var(--s4));
+  border-radius:2px;
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .55s cubic-bezier(.25,.46,.45,.94);
+}
+#emWord.ul-active::after{transform:scaleX(1)}
+
+.sub{
+  font-size:clamp(14px,2vw,17px);
+  color:rgba(255,255,255,.4);
+  font-weight:300;max-width:440px;line-height:1.8;
+  margin-top:22px;margin-bottom:36px;
+  opacity:0;/* GSAP start */
+}
+
+/* ── COUNTDOWN ── */
+.countdown-wrap{margin-bottom:14px;opacity:0}
+.countdown-label{
+  font-family:'DM Mono',monospace;
+  font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:14px;
+}
+.countdown{display:flex;gap:10px;flex-wrap:wrap}
+.cd-unit{
+  display:flex;flex-direction:column;align-items:center;
+  background:var(--surface);border:1px solid var(--rule);
+  border-radius:4px;
+  padding:16px 20px 12px;
+  min-width:72px;
+  position:relative;overflow:hidden;
+  transition:border-color .25s;
+  /* No hover box-shadow on mobile — costly repaint */
+}
+/* 4-column grid at 360px: avoids overflow (4×72+3×10=318px > 312px available) */
+@media(max-width:599px){
+  .countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .cd-unit{min-width:0;padding:12px 6px 10px}
+}
+@media(min-width:600px){
+  .cd-unit{min-width:88px;padding:10px 28px 10px}
+  .cd-unit:nth-child(1):hover{border-color:var(--s2);box-shadow:0 0 14px var(--s2a)}
+  .cd-unit:nth-child(2):hover{border-color:var(--s4);box-shadow:0 0 14px var(--s4a)}
+  .cd-unit:nth-child(3):hover{border-color:var(--s3);box-shadow:0 0 14px var(--s3a)}
+  .cd-unit:nth-child(4):hover{border-color:var(--s1);box-shadow:0 0 14px var(--s1a)}
+}
+.cd-unit::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+}
+.cd-unit:nth-child(1)::before{background:var(--s2)}
+.cd-unit:nth-child(2)::before{background:var(--s4)}
+.cd-unit:nth-child(3)::before{background:var(--s3)}
+.cd-unit:nth-child(4)::before{background:var(--s1)}
+.cd-num{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(28px,7vw,42px);
+  font-weight:900;line-height:1;margin-bottom:6px;
+  will-change:transform;/* GSAP tick */
+}
+.cd-unit:nth-child(1) .cd-num{color:var(--s2)}
+.cd-unit:nth-child(2) .cd-num{color:var(--s4)}
+.cd-unit:nth-child(3) .cd-num{color:var(--s3)}
+.cd-unit:nth-child(4) .cd-num{color:var(--s1)}
+.cd-lbl{
+  font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+}
+
+/* ── CERT TIMELINE ── */
+.timeline-wrap{opacity:0}
+.timeline-label{
+  font-family:'DM Mono',monospace;
+  font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:12px;
+}
+.timeline{display:flex;gap:8px;flex-wrap:wrap}
+.tl-item{
+  display:flex;flex-direction:column;gap:5px;
+  padding:10px 14px;
+  background:var(--surface);border:1px solid var(--rule);
+  border-radius:4px;position:relative;overflow:hidden;
+  min-width:100px;
+  transition:border-color .2s,transform .2s;
+}
+/* 2×2 grid on mobile so items don't overflow */
+@media(max-width:599px){
+  .tl-item{flex:1 1 calc(50% - 4px);min-width:0}
+}
+.tl-item::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+}
+.tl-item.cert-1::after{background:var(--s2)}
+.tl-item.cert-2::after{background:var(--s4)}
+.tl-item.cert-3::after{background:var(--s1)}
+.tl-item.cert-4::after{background:var(--s3)}
+.tl-date{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.tl-name{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.07em;white-space:nowrap}
+.tl-item.cert-1 .tl-name{color:var(--s2)}
+.tl-item.cert-2 .tl-name{color:var(--s4)}
+.tl-item.cert-3 .tl-name{color:var(--s1)}
+.tl-item.cert-4 .tl-name{color:var(--s3)}
+
+/* ── CERT EARNED STATE — auto-applied by JS when date passes ── */
+.tl-item.earned::before{
+  content:'✓ EARNED';
+  position:absolute;top:5px;right:6px;
+  font-family:'DM Mono',monospace;
+  font-size:7px;letter-spacing:.12em;
+}
+.tl-item.cert-1.earned::before{color:var(--s2)}
+.tl-item.cert-2.earned::before{color:var(--s4)}
+.tl-item.cert-3.earned::before{color:var(--s1)}
+.tl-item.cert-4.earned::before{color:var(--s3)}
+
+/* ── FEATURE TAGS — horizontal scroll on mobile, column on desktop ── */
+.feature-tags{
+  display:flex;
+  flex-direction:row;gap:10px;
+  opacity:0;
+  overflow-x:auto;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:2px;
+  margin-top:20px;
+  max-width:100%;
+}
+.feature-tags::-webkit-scrollbar{display:none}
+@media(min-width:1000px){
+  .feature-tags{
+    position:absolute;right:80px;top:50%;
+    transform:translateY(-50%);
+    flex-direction:column;
+    overflow:visible;
+    margin-top:0;
+    max-width:none;
+  }
+}
+.feature-tag{
+  display:flex;align-items:center;gap:11px;
+  padding:13px 18px;
+  background:var(--surface);border:1px solid var(--rule);
+  border-radius:4px;min-width:220px;
+  transition:border-color .2s,background .2s,transform .2s;
+  cursor:default;
+}
+.feature-tag:hover{background:#1e2230;transform:translateX(-4px)}
+.feature-tag.s1{border-left:3px solid var(--s1)}
+.feature-tag.s2{border-left:3px solid var(--s2)}
+.feature-tag.s3{border-left:3px solid var(--s3)}
+.feature-tag.s4{border-left:3px solid var(--s4)}
+.feature-tag.s1:hover{border-color:var(--s1);box-shadow:0 0 10px var(--s1b)}
+.feature-tag.s2:hover{border-color:var(--s2);box-shadow:0 0 10px var(--s2b)}
+.feature-tag.s3:hover{border-color:var(--s3);box-shadow:0 0 10px var(--s3b)}
+.feature-tag.s4:hover{border-color:var(--s4);box-shadow:0 0 10px var(--s4b)}
+.ft-icon{width:32px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.s1 .ft-icon{background:var(--s1b)}.s2 .ft-icon{background:var(--s2b)}
+.s3 .ft-icon{background:var(--s3b)}.s4 .ft-icon{background:var(--s4b)}
+.ft-text{display:flex;flex-direction:column;gap:2px}
+.ft-title{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+.ft-desc{font-size:11.5px;color:var(--muted);line-height:1.4}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  height:46px;
+  background:rgba(10,13,18,.95);
+  border-top:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  z-index:100;
+}
+@media(min-width:600px){.bottom-bar{padding:0 40px}}
+.bb-left{
+  font-family:'DM Mono',monospace;
+  font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);display:flex;align-items:center;gap:7px;
+}
+.status-dot{
+  width:6px;height:6px;background:var(--s2);border-radius:50%;
+  animation:blink 2.2s ease-in-out infinite;
+}
+@keyframes blink{
+  0%,100%{opacity:1}
+  50%{opacity:.4}
+}
+.bb-right{display:flex;gap:16px;align-items:center}
+.bb-link{
+  font-family:'DM Mono',monospace;
+  font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;
+  transition:color .2s;
+}
+.bb-link:hover{color:var(--ink)}
+
+/* ── CORNER TEXT — desktop only ── */
+.corner-text{
+  position:fixed;bottom:60px;right:36px;
+  font-family:'DM Mono',monospace;
+  font-size:9.5px;color:rgba(255,255,255,.1);
+  letter-spacing:.11em;text-align:right;line-height:1.75;
+  display:none;opacity:0;
+}
+@media(min-width:900px){.corner-text{display:block}}
+</style>
+<!-- JSON-LD: Google can surface name/role in search results -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "NeroVoxx",
+  "jobTitle": "Cloud Security Engineer",
+  "description": "10+ years in engineering, specializing in AWS cloud security and cloud-native defense.",
+  "url": "https://nerovoxx.com",
+  "email": "nero@nerovoxx.com",
+  "sameAs": [
+    "https://github.com/nerovoxx",
+    "https://linkedin.com/in/nerovoxx"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Colombo",
+    "addressCountry": "LK"
+  }
+}
+</script>
+<noscript><style>
+  .eyebrow,h1,.sub,.countdown-wrap,.timeline-wrap,.feature-tags{opacity:1!important;transform:none!important}
+  #nav{opacity:1!important;transform:none!important}
+</style></noscript>
+</head>
+<body>
+
+<div class="glow-1"></div>
+<div class="glow-2"></div>
+<div class="grid-lines"></div>
+<div class="progress-line" id="progressLine"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="4" fill="rgba(42,175,175,0.12)"/>
+      <path d="M14 5L7 8v5c0 4.1 3 7.9 7 9 4-1.1 7-4.9 7-9V8l-7-3z" stroke="#2aafaf" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M11 14l2 2 4-4" stroke="#2aafaf" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    NeroVoxx<span>&nbsp;/ Cloud Security</span>
+  </div>
+  <div class="nav-badge">Portfolio · Jan 2027</div>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <div class="eyebrow" id="eyebrow">// NeroVoxx · Colombo, Sri Lanka</div>
+
+  <h1 id="headline">Building a career in<br><em id="emWord">Cloud Security</em><br>from the ground up.</h1>
+
+  <p class="sub" id="sub">10+ years in engineering. Now going deep on AWS, offensive security, and cloud-native defense.<br>Full portfolio launches January 2027.</p>
+
+  <!-- COUNTDOWN -->
+  <div class="countdown-wrap" id="cdWrap">
+    <div class="countdown-label">// Days Until Portfolio Launch</div>
+    <div class="countdown">
+      <div class="cd-unit"><div class="cd-num" id="cd-days">000</div><div class="cd-lbl">Days</div></div>
+      <div class="cd-unit"><div class="cd-num" id="cd-hours">00</div><div class="cd-lbl">Hours</div></div>
+      <div class="cd-unit"><div class="cd-num" id="cd-mins">00</div><div class="cd-lbl">Mins</div></div>
+      <div class="cd-unit"><div class="cd-num" id="cd-secs">00</div><div class="cd-lbl">Secs</div></div>
+    </div>
+  </div>
+
+  <!-- CERT TIMELINE -->
+  <div class="timeline-wrap" id="tlWrap">
+    <div class="timeline-label">// Certification Roadmap — 2026</div>
+    <div class="timeline">
+      <div class="tl-item cert-1"><div class="tl-date">Jun 2026</div><div class="tl-name">AWS CCP</div></div>
+      <div class="tl-item cert-2"><div class="tl-date">Oct 2026</div><div class="tl-name">AWS SAA</div></div>
+      <div class="tl-item cert-3"><div class="tl-date">Nov 2026</div><div class="tl-name">AWS SCS-C02</div></div>
+      <div class="tl-item cert-4"><div class="tl-date">Dec 2026</div><div class="tl-name">CompTIA Sec+</div></div>
+    </div>
+  </div>
+
+  <!-- FEATURE TAGS — desktop only -->
+  <div class="feature-tags" id="featureTags">
+    <div class="feature-tag s2">
+      <div class="ft-icon">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#2aafaf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 2v4l2.5 2.5"/><circle cx="8" cy="8" r="6"/>
+        </svg>
+      </div>
+      <div class="ft-text"><div class="ft-title">P1 — CIS Auditor</div><div class="ft-desc">IDENTIFY · AWS config baseline</div></div>
+    </div>
+    <div class="feature-tag s4">
+      <div class="ft-icon">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#5a9fd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><path d="M9 11.5h5M11.5 9v5"/>
+        </svg>
+      </div>
+      <div class="ft-text"><div class="ft-title">P2 — S3 Monitor</div><div class="ft-desc">PROTECT · Bucket security guard</div></div>
+    </div>
+    <div class="feature-tag s1">
+      <div class="ft-icon">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#e8824a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 12l4-4 3 3 5-6"/><circle cx="14" cy="5" r="1.5" fill="#e8824a" stroke="none"/>
+        </svg>
+      </div>
+      <div class="ft-text"><div class="ft-title">P3 — CloudTrail SIEM</div><div class="ft-desc">DETECT · MITRE ATT&amp;CK mapped</div></div>
+    </div>
+    <div class="feature-tag s3">
+      <div class="ft-icon">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#a870e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/>
+        </svg>
+      </div>
+      <div class="ft-text"><div class="ft-title">P4 — IR Automation</div><div class="ft-desc">RESPOND · GuardDuty serverless</div></div>
+    </div>
+  </div>
+</main>
+
+<!-- CORNER TEXT -->
+<div class="corner-text" id="cornerText">
+  Target: Remote · Jan 2027<br>
+  Estonia · Germany · Romania · Singapore · UAE · UK · USA<br>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bb-left"><div class="status-dot"></div>Studying · Building · Shipping</div>
+  <div class="bb-right">
+    <a class="bb-link" id="emailLink" href="mailto:nero@nerovoxx.com">Email</a>
+    <a class="bb-link" href="https://github.com/nerovoxx" target="_blank" rel="noopener">GitHub</a>
+    <a class="bb-link" href="https://linkedin.com/in/nerovoxx" target="_blank" rel="noopener">LinkedIn</a>
+    <a class="bb-link" href="https://x.com/nerovoxx" target="_blank" rel="noopener">X</a>
+  </div>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+
+  /* Reveal content without animation — fallback if GSAP CDN fails */
+  function showContent() {
+    ['#eyebrow','#headline','#sub','#cdWrap','#tlWrap','#nav','#featureTags'].forEach(sel => {
+      const el = document.querySelector(sel);
+      if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
+    });
+  }
+
+  /* Poll for GSAP (loaded async); give up after 3 s and show content plain */
+  let _poll = 0;
+  function initGSAP() {
+    if (typeof gsap === 'undefined') {
+      if (++_poll > 60) { showContent(); return; }
+      setTimeout(initGSAP, 50);
+      return;
+    }
+    runAnimations();
+  }
+  initGSAP();
+
+  function runAnimations() {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    /* Typewriter setup — store text, clear element before animation */
+    const eyebrowEl = document.getElementById('eyebrow');
+    const eyebrowText = eyebrowEl.textContent.trim();
+    eyebrowEl.textContent = '';
+
+    /* 1 — Progress bar (scaleX = GPU-composited; was width = layout paint) */
+    tl.to('#progressLine', { scaleX: 0.68, duration: 2.0, ease: 'power2.out' }, 0);
+
+    /* 2 — Nav slides down */
+    gsap.set('#nav', { y: -70, opacity: 0 });
+    tl.to('#nav', { y: 0, opacity: 1, duration: 0.55 }, 0.1);
+
+    /* 3 — Eyebrow fade in + typewriter */
+    gsap.set('#eyebrow', { y: 18 });
+    tl.to('#eyebrow', { opacity: 1, y: 0, duration: 0.55 }, 0.35);
+    tl.call(() => {
+      let i = 0;
+      const timer = setInterval(() => {
+        eyebrowEl.textContent += eyebrowText[i++];
+        if (i >= eyebrowText.length) clearInterval(timer);
+      }, 45);
+    }, null, 0.35);
+
+    /* 4 — Headline */
+    gsap.set('#headline', { y: 22 });
+    tl.to('#headline', { opacity: 1, y: 0, duration: 0.65 }, 0.52);
+
+    /* 5 — Underline on "Cloud Security" via CSS class (GSAP can't target ::after) */
+    tl.call(() => {
+      document.getElementById('emWord').classList.add('ul-active');
+    }, null, 1.15);
+
+    /* 6 — Sub text */
+    gsap.set('#sub', { y: 18 });
+    tl.to('#sub', { opacity: 1, y: 0, duration: 0.6 }, 0.72);
+
+    /* 7 — Countdown */
+    gsap.set('#cdWrap', { y: 16 });
+    tl.to('#cdWrap', { opacity: 1, y: 0, duration: 0.6 }, 0.92);
+
+    /* 8 — Timeline */
+    gsap.set('#tlWrap', { y: 14 });
+    tl.to('#tlWrap', { opacity: 1, y: 0, duration: 0.55 }, 1.1);
+
+    const tlItems = document.querySelectorAll('.tl-item');
+    gsap.set(tlItems, { opacity: 0, x: -12 });
+    tl.to(tlItems, { opacity: 1, x: 0, duration: 0.4, stagger: 0.1 }, 1.18);
+
+    /* 9 — Feature tags (desktop: slide from right; mobile: slide from right in scroll row) */
+    const ftags = document.querySelectorAll('.feature-tag');
+    if (ftags.length) {
+      const isDesktop = window.innerWidth >= 1000;
+      gsap.set(ftags, { opacity: 0, x: isDesktop ? 24 : 20 });
+      tl.to('#featureTags', { opacity: 1, duration: 0.01 }, 1.2);
+      tl.to(ftags, { opacity: 1, x: 0, duration: isDesktop ? 0.45 : 0.4, stagger: isDesktop ? 0.12 : 0.08, ease: 'power2.out' }, 1.25);
+    }
+
+    /* 10 — Corner text */
+    gsap.set('#cornerText', { opacity: 0, y: 10 });
+    tl.to('#cornerText', { opacity: 1, y: 0, duration: 0.5 }, 1.45);
+  }
+});
+
+/* ─────────────────────────────────────────────
+   COUNTDOWN — optimised for low-end
+   - Only DOM writes when value changes
+   - GSAP small bounce only on changed unit (not all 4)
+   - requestAnimationFrame with 1s throttle
+─────────────────────────────────────────────── */
+const LAUNCH = new Date('2027-01-01T00:00:00+05:30');
+const cdEls = {
+  days:  document.getElementById('cd-days'),
+  hours: document.getElementById('cd-hours'),
+  mins:  document.getElementById('cd-mins'),
+  secs:  document.getElementById('cd-secs'),
+};
+const prevVals = { days: '', hours: '', mins: '', secs: '' };
+
+function pad(n, w) { return String(Math.max(0, n)).padStart(w, '0'); }
+
+let lastTick = 0;
+function tick(ts) {
+  if (ts - lastTick < 1000) { requestAnimationFrame(tick); return; }
+  lastTick = ts;
+
+  const diff = Math.max(0, LAUNCH - Date.now());
+  const vals = {
+    days:  pad(Math.floor(diff / 86400000), 3),
+    hours: pad(Math.floor((diff % 86400000) / 3600000), 2),
+    mins:  pad(Math.floor((diff % 3600000) / 60000), 2),
+    secs:  pad(Math.floor((diff % 60000) / 1000), 2),
+  };
+
+  for (const key in vals) {
+    if (vals[key] !== prevVals[key]) {
+      cdEls[key].textContent = vals[key];
+      prevVals[key] = vals[key];
+      /* Small bounce — only fires on change, GPU-only (transform) */
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(cdEls[key],
+          { y: -5, opacity: 0.6 },
+          { y: 0, opacity: 1, duration: 0.28, ease: 'back.out(2)', overwrite: true }
+        );
+      }
+    }
+  }
+
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+/* ── GLOW MOUSE PARALLAX — desktop only, overrides CSS drift ── */
+if (window.matchMedia('(pointer:fine)').matches) {
+  const g1 = document.querySelector('.glow-1');
+  const g2 = document.querySelector('.glow-2');
+  let tx1=0,ty1=0,tx2=0,ty2=0,cx1=0,cy1=0,cx2=0,cy2=0;
+  document.addEventListener('mousemove', e => {
+    const nx = e.clientX / window.innerWidth - 0.5;
+    const ny = e.clientY / window.innerHeight - 0.5;
+    tx1 = nx * 40; ty1 = ny * 30;
+    tx2 = -nx * 30; ty2 = -ny * 35;
+  });
+  (function glowLoop() {
+    cx1 += (tx1 - cx1) * 0.06; cy1 += (ty1 - cy1) * 0.06;
+    cx2 += (tx2 - cx2) * 0.05; cy2 += (ty2 - cy2) * 0.05;
+    g1.style.transform = `translate(${cx1}px,${cy1}px)`;
+    g2.style.transform = `translate(${cx2}px,${cy2}px)`;
+    requestAnimationFrame(glowLoop);
+  })();
+}
+
+/* ── 3D TILT ON CERT TIMELINE CARDS — desktop only ── */
+if (window.matchMedia('(pointer:fine)').matches) {
+  document.querySelectorAll('.tl-item').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(500px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg) translateY(-4px)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
+}
+
+/* ── CERT COMPLETION CHECKMARKS — auto-applies when date passes ── */
+const certDates = [
+  { cls: 'cert-1', date: new Date('2026-06-30') },
+  { cls: 'cert-2', date: new Date('2026-10-31') },
+  { cls: 'cert-3', date: new Date('2026-11-30') },
+  { cls: 'cert-4', date: new Date('2026-12-31') },
+];
+const now = new Date();
+document.querySelectorAll('.tl-item').forEach(item => {
+  const match = certDates.find(c => item.classList.contains(c.cls));
+  if (match && now > match.date) item.classList.add('earned');
+});
+
+/* ── COPY EMAIL TO CLIPBOARD ── */
+document.getElementById('emailLink').addEventListener('click', function(e) {
+  e.preventDefault();
+  navigator.clipboard.writeText('nero@nerovoxx.com')
+    .then(() => {
+      const orig = this.textContent;
+      this.textContent = 'Copied!';
+      this.style.color = 'var(--s2)';
+      setTimeout(() => { this.textContent = orig; this.style.color = ''; }, 1800);
+    })
+    .catch(() => { window.location.href = 'mailto:nero@nerovoxx.com'; });
+});
+
+/* ── SERVICE WORKER — offline cache ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
