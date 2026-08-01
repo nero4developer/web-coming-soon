@@ -37,6 +37,7 @@
 
 <!-- PWA manifest -->
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
 <!-- GSAP -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" async></script>
@@ -148,13 +149,14 @@ body::before{
   transition:opacity .6s ease;
 }
 .splash-inner{
-  display:flex;flex-direction:column;align-items:center;gap:26px;
+  --logo-w:clamp(180px,32vw,300px);
+  display:flex;flex-direction:column;align-items:center;gap:calc(var(--logo-w) * 0.0724);
 }
 .splash-mark{
   /* no transition of its own — the 3 inner SVG groups animate independently */
 }
 .splash-logo-svg{
-  width:clamp(180px,32vw,300px);height:auto;display:block;
+  width:var(--logo-w);height:auto;display:block;
   overflow:visible;
 }
 .splash-part-icon,.splash-part-word,.splash-part-slogan{
@@ -162,7 +164,7 @@ body::before{
   transition:opacity .6s ease,transform .6s ease;
 }
 .splash-loadbar{
-  width:180px;height:2px;border-radius:2px;
+  width:var(--logo-w);height:2px;border-radius:2px;
   background:rgba(255,255,255,.12);overflow:hidden;
   opacity:0;transition:opacity .4s ease;
 }
@@ -199,7 +201,7 @@ nav{
 }
 @media(max-width:599px){
   nav{
-    backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
     flex-direction:column;
     justify-content:center;
     height:auto;
@@ -238,7 +240,7 @@ main{
   flex:1;
   display:flex;flex-direction:column;
   align-items:flex-start;justify-content:center;
-  padding:127px 24px 26px;
+  padding:140px 24px 100px;
   position:relative;
   min-height:100vh;
   z-index:1;
@@ -426,7 +428,7 @@ h1 em::after{
 .portfolio{
   width:100%;position:relative;z-index:1;
   border-top:1px solid var(--rule);
-  padding:107px 24px 20px;
+  padding:56px 24px 20px;
 }
 @media(min-width:600px){.portfolio{padding:64px 40px 20px}}
 @media(min-width:900px){.portfolio{padding:72px 80px 120px}}
@@ -436,8 +438,8 @@ h1 em::after{
   font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
   color:var(--muted);margin-bottom:28px;
 }
-.portfolio-group{margin-bottom:40px; padding-bottom: 27px;}
-.portfolio-group:last-child{margin-bottom:0; padding-bottom: 40px;}
+.portfolio-group{margin-bottom:40px}
+.portfolio-group:last-child{margin-bottom:0}
 .pg-title{
   font-family:'Playfair Display',serif;
   font-size:clamp(19px,3.6vw,26px);font-weight:700;
@@ -495,10 +497,8 @@ h1 em::after{
     flex-direction:column;
     justify-content:center;
     height:auto;
-    padding:15px 15px;
-    gap:15px;
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    padding:8px 16px;
+    gap:5px;
   }
   .bb-left{justify-content:center;width:100%}
   .bb-right{justify-content:center;width:100%;flex-wrap:wrap;gap:12px}
@@ -540,9 +540,8 @@ h1 em::after{
     position:static;
     text-align:center;
     color:rgba(255,255,255,.16);
-    padding:10px 24px 92px;
+    padding:14px 24px 56px;
     line-height:1.8;
-    margin-bottom: 81px;
   }
 }
 </style>
@@ -580,7 +579,7 @@ h1 em::after{
 <div class="splash" id="splash">
   <div class="splash-inner">
     <div class="splash-mark" id="splashMark">
-      <svg class="splash-logo-svg" viewBox="0 0 847.09 472.81" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NeroVoxx — From Frontline to Strategy">
+      <svg class="splash-logo-svg" viewBox="9.9 13.9 827.3 449.8" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NeroVoxx — From Frontline to Strategy">
 <g id="Nero_Voxx_-_Logo">
 	<g id="Slogan_Line_1" class="splash-part-slogan">
 		<g>
