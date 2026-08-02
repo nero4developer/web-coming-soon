@@ -432,6 +432,7 @@ h1 em::after{
 .hp-scroll{
   max-height:84vh;
   overflow-y:auto;
+  overflow-x:hidden;
   padding-right:6px;
   scrollbar-width:thin;
   scrollbar-color:var(--rule) transparent;
@@ -531,6 +532,7 @@ h1 em::after{
   z-index:100;
 }
 @media(min-width:600px){.bottom-bar{padding:0 40px}}
+@media(min-width:900px){.bottom-bar{padding:0 56px}}
 @media(max-width:599px){
   .bottom-bar{
     flex-direction:column;
@@ -566,7 +568,8 @@ h1 em::after{
 
 /* ── CORNER TEXT — desktop only ── */
 .corner-text{
-  position:fixed;bottom:60px;right:36px;
+  position:fixed;bottom:60px;right:48px;
+  max-width:300px;
   font-family:'DM Mono',monospace;
   font-size:9.5px;color:rgba(255,255,255,.34);
   letter-spacing:.11em;text-align:right;line-height:1.75;
@@ -1153,6 +1156,12 @@ document.querySelectorAll('[data-project-group]').forEach(grid => {
 
 window.addEventListener('DOMContentLoaded', () => {
 
+  /* Guards against the animation firing more than once — it can be
+     triggered from three places (splash exit, the direct call below
+     when there's no splash, and the retry-poll in startHeroReveal),
+     and running it twice raced the eyebrow typewriter against itself. */
+  let heroRevealStarted = false;
+
   /* Reveal content without animation — fallback if GSAP CDN fails */
   function showContent() {
     ['#eyebrow','#headline','#sub','#cdWrap','#tlWrap','#nav'].forEach(sel => {
@@ -1164,11 +1173,13 @@ window.addEventListener('DOMContentLoaded', () => {
   /* Poll for GSAP (loaded async); give up after 3 s and show content plain */
   let _poll = 0;
   function initGSAP() {
+    if (heroRevealStarted) return;
     if (typeof gsap === 'undefined') {
-      if (++_poll > 60) { showContent(); return; }
+      if (++_poll > 60) { heroRevealStarted = true; showContent(); return; }
       setTimeout(initGSAP, 50);
       return;
     }
+    heroRevealStarted = true;
     runAnimations();
   }
   /* Hero reveal now starts only once the splash begins its exit (see splash sequence above) —
@@ -1198,8 +1209,8 @@ window.addEventListener('DOMContentLoaded', () => {
     tl.call(() => {
       let i = 0;
       const timer = setInterval(() => {
+        if (i >= eyebrowText.length) { clearInterval(timer); return; }
         eyebrowEl.textContent += eyebrowText[i++];
-        if (i >= eyebrowText.length) clearInterval(timer);
       }, 45);
     }, null, 0.35);
 
