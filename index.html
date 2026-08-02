@@ -56,9 +56,19 @@ html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
   --s4:#5a9fd4;--s4a:rgba(90,159,212,.18);--s4b:rgba(90,159,212,.08);
   --accent:#e8a070;
   --rule:#2a2e38;
-  --muted:#7a8090;
+  --muted:#9aa0b3;
   --surface:#161a22;
 }
+
+/* ── SKIP LINK — hidden until focused, sits above the splash (z-index 9999) ── */
+.skip-link{
+  position:fixed;top:-60px;left:12px;z-index:10000;
+  background:var(--surface);color:var(--ink);
+  padding:10px 16px;border-radius:4px;border:1px solid var(--s2);
+  font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.05em;
+  text-decoration:none;transition:top .2s ease;
+}
+.skip-link:focus{top:12px;outline:2px solid var(--s2);outline-offset:2px}
 
 /* ── BASE ── */
 body{
@@ -249,6 +259,11 @@ main{
 @media(min-width:900px){main{padding:120px 80px 80px}}
 @media(min-width:1000px){main{padding-right:600px}}
 @media(min-width:1280px){main{padding-right:660px}}
+/* Past ~1600px the fixed padding-right leaves an ever-growing dead
+   gap between the hero text and the portfolio panel. Capping and
+   centering main keeps the two halves visually balanced instead of
+   pinned left/right on ultra-wide monitors. */
+@media(min-width:1600px){main{max-width:1760px;margin:0 auto}}
 
 /* ── HERO TYPE ── */
 .eyebrow{
@@ -281,7 +296,7 @@ h1 em::after{
 
 .sub{
   font-size:clamp(14px,2vw,17px);
-  color:rgba(255,255,255,.4);
+  color:rgba(255,255,255,.62);
   font-weight:300;max-width:440px;line-height:1.8;
   margin-top:22px;margin-bottom:36px;
   opacity:0;/* GSAP start */
@@ -402,14 +417,38 @@ h1 em::after{
     transform:translateY(-50%);
     width:520px;
     max-height:84vh;
-    overflow-y:auto;
-    scrollbar-width:none;
+    /* outer wrapper no longer scrolls itself — see .hp-scroll — so the
+       fade indicator below can sit fixed over the scrollable content */
+    overflow:hidden;
   }
-  .hero-portfolio::-webkit-scrollbar{display:none}
   /* below-hero full section becomes redundant once the hero panel shows everything */
   .portfolio{display:none}
 }
 @media(min-width:1280px){.hero-portfolio{width:560px}}
+
+/* Scrollable inner: a visible (not hidden) thin scrollbar so it's clear
+   there's more to see, plus room on the right so the thumb doesn't sit
+   on top of card content. */
+.hp-scroll{
+  max-height:84vh;
+  overflow-y:auto;
+  padding-right:6px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--rule) transparent;
+}
+.hp-scroll::-webkit-scrollbar{width:6px}
+.hp-scroll::-webkit-scrollbar-track{background:transparent}
+.hp-scroll::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px}
+.hp-scroll::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+
+/* Fade cue at the bottom of the panel — only shown (via JS) when the
+   content actually overflows, so it doesn't lie about there being more. */
+.hp-fade{
+  position:absolute;left:0;right:6px;bottom:0;height:44px;
+  background:linear-gradient(to bottom,transparent,var(--paper) 88%);
+  pointer-events:none;opacity:0;transition:opacity .2s ease;
+}
+.hp-fade.visible{opacity:1}
 .hp-label{
   font-family:'DM Mono',monospace;
   font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
@@ -529,7 +568,7 @@ h1 em::after{
 .corner-text{
   position:fixed;bottom:60px;right:36px;
   font-family:'DM Mono',monospace;
-  font-size:9.5px;color:rgba(255,255,255,.1);
+  font-size:9.5px;color:rgba(255,255,255,.34);
   letter-spacing:.11em;text-align:right;line-height:1.75;
   display:none;opacity:0;
 }
@@ -539,7 +578,7 @@ h1 em::after{
     display:block;
     position:static;
     text-align:center;
-    color:rgba(255,255,255,.16);
+    color:rgba(255,255,255,.4);
     padding:14px 24px 56px;
     line-height:1.8;
   }
@@ -574,6 +613,8 @@ h1 em::after{
 </style></noscript>
 </head>
 <body>
+
+<a href="#main-content" class="skip-link">Skip to content</a>
 
 <!-- SPLASH SCREEN — logo lockup + loading bar; fades to reveal the animated site -->
 <div class="splash" id="splash">
@@ -853,7 +894,7 @@ h1 em::after{
 </nav>
 
 <!-- MAIN -->
-<main>
+<main id="main-content" tabindex="-1">
   <div class="eyebrow" id="eyebrow">// NeroVoxx · Colombo, Sri Lanka</div>
 
   <h1 id="headline">Building a career in<br><em id="emWord">Cloud Security</em><br>from the ground up.</h1>
@@ -863,7 +904,7 @@ h1 em::after{
   <!-- COUNTDOWN -->
   <div class="countdown-wrap" id="cdWrap">
     <div class="countdown-label">// Days Until Portfolio Launch</div>
-    <div class="countdown">
+    <div class="countdown" role="group" aria-label="Time remaining until the portfolio launches, April 1 2027">
       <div class="cd-unit"><div class="cd-num" id="cd-days">000</div><div class="cd-lbl">Days</div></div>
       <div class="cd-unit"><div class="cd-num" id="cd-hours">00</div><div class="cd-lbl">Hours</div></div>
       <div class="cd-unit"><div class="cd-num" id="cd-mins">00</div><div class="cd-lbl">Mins</div></div>
@@ -885,67 +926,20 @@ h1 em::after{
 
   <!-- HERO PORTFOLIO PANEL — desktop only, right side of hero (all 12 projects) -->
   <div class="hero-portfolio" id="heroPortfolio">
-    <div class="hp-label">// Portfolio — 12 Projects</div>
+    <div class="hp-scroll" id="hpScroll">
+      <div class="hp-label">// Portfolio — 12 Projects</div>
 
-    <div class="hp-group">
-      <div class="hp-title">SOC <span>Operations</span></div>
-      <div class="hp-grid">
-        <div class="proj-card s3">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#a870e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg></div>
-          <div class="ft-text"><div class="ft-title">PhishLens</div><div class="ft-desc">RESPOND ·<br>Serverless IR Automation</div></div>
-        </div>
-        <div class="proj-card s1">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#e8824a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12l4-4 3 3 5-6"/><circle cx="14" cy="5" r="1.5" fill="#e8824a" stroke="none"/></svg></div>
-          <div class="ft-text"><div class="ft-title">BlueCell</div><div class="ft-desc">DETECT ·<br>Home SOC Lab, Wazuh SIEM Attack Simulation</div></div>
-        </div>
-        <div class="proj-card s2">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#2aafaf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4l2.5 2.5"/><circle cx="8" cy="8" r="6"/></svg></div>
-          <div class="ft-text"><div class="ft-title">ThreatPulse</div><div class="ft-desc">IDENTIFY ·<br>Multi-Source Threat Intelligence Dashboard</div></div>
-        </div>
-        <div class="proj-card s2">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#2aafaf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4l2.5 2.5"/><circle cx="8" cy="8" r="6"/></svg></div>
-          <div class="ft-text"><div class="ft-title">AutoVuln</div><div class="ft-desc">IDENTIFY ·<br>Automated Vulnerability Assessment Engine</div></div>
-        </div>
-        <div class="proj-card s4">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#5a9fd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><path d="M9 11.5h5M11.5 9v5"/></svg></div>
-          <div class="ft-text"><div class="ft-title">SecureVault</div><div class="ft-desc">PROTECT ·<br>Hardened Cloud Credential Manager</div></div>
-        </div>
-        <div class="proj-card s1">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#e8824a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12l4-4 3 3 5-6"/><circle cx="14" cy="5" r="1.5" fill="#e8824a" stroke="none"/></svg></div>
-          <div class="ft-text"><div class="ft-title">ThreatLure</div><div class="ft-desc">DETECT ·<br>HoneyPot Threat Intelligence</div></div>
-        </div>
-        <div class="proj-card s1">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#e8824a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12l4-4 3 3 5-6"/><circle cx="14" cy="5" r="1.5" fill="#e8824a" stroke="none"/></svg></div>
-          <div class="ft-text"><div class="ft-title">SentinelOps</div><div class="ft-desc">DETECT ·<br>MITRE ATT&amp;CK Detection Engineering</div></div>
-        </div>
-        <div class="proj-card s3">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#a870e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg></div>
-          <div class="ft-text"><div class="ft-title">TriageAI</div><div class="ft-desc">RESPOND ·<br>AI-Assisted SOC Triage Pipeline</div></div>
-        </div>
+      <div class="hp-group">
+        <div class="hp-title">SOC <span>Operations</span></div>
+        <div class="hp-grid" data-project-group="soc"></div>
+      </div>
+
+      <div class="hp-group">
+        <div class="hp-title">Cloud Security <span>— AWS</span></div>
+        <div class="hp-grid" data-project-group="cloud"></div>
       </div>
     </div>
-
-    <div class="hp-group">
-      <div class="hp-title">Cloud Security <span>— AWS</span></div>
-      <div class="hp-grid">
-        <div class="proj-card s2">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#2aafaf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4l2.5 2.5"/><circle cx="8" cy="8" r="6"/></svg></div>
-          <div class="ft-text"><div class="ft-title">CISProbe</div><div class="ft-desc">IDENTIFY ·<br>CIS Compliance Engine</div></div>
-        </div>
-        <div class="proj-card s4">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#5a9fd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><path d="M9 11.5h5M11.5 9v5"/></svg></div>
-          <div class="ft-text"><div class="ft-title">S3Shield</div><div class="ft-desc">PROTECT ·<br>S3 Auto-Remediation System</div></div>
-        </div>
-        <div class="proj-card s1">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#e8824a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12l4-4 3 3 5-6"/><circle cx="14" cy="5" r="1.5" fill="#e8824a" stroke="none"/></svg></div>
-          <div class="ft-text"><div class="ft-title">TrailSIEM</div><div class="ft-desc">DETECT ·<br>CloudTrail Threat Detection</div></div>
-        </div>
-        <div class="proj-card s3">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#a870e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg></div>
-          <div class="ft-text"><div class="ft-title">IRZero</div><div class="ft-desc">RESPOND ·<br>Serverless IR Automation</div></div>
-        </div>
-      </div>
-    </div>
+    <div class="hp-fade" id="hpFade" aria-hidden="true"></div>
   </div>
 </main>
 
@@ -956,63 +950,42 @@ h1 em::after{
 
     <div class="portfolio-group">
       <h2 class="pg-title">SOC <span>Operations</span></h2>
-      <div class="portfolio-grid">
-        <div class="proj-card s3">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#a870e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg></div>
-          <div class="ft-text"><div class="ft-title">PhishLens</div><div class="ft-desc">RESPOND ·<br>Serverless IR Automation</div></div>
-        </div>
-        <div class="proj-card s1">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#e8824a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12l4-4 3 3 5-6"/><circle cx="14" cy="5" r="1.5" fill="#e8824a" stroke="none"/></svg></div>
-          <div class="ft-text"><div class="ft-title">BlueCell</div><div class="ft-desc">DETECT ·<br>Home SOC Lab, Wazuh SIEM Attack Simulation</div></div>
-        </div>
-        <div class="proj-card s2">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#2aafaf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4l2.5 2.5"/><circle cx="8" cy="8" r="6"/></svg></div>
-          <div class="ft-text"><div class="ft-title">ThreatPulse</div><div class="ft-desc">IDENTIFY ·<br>Multi-Source Threat Intelligence Dashboard</div></div>
-        </div>
-        <div class="proj-card s2">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#2aafaf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4l2.5 2.5"/><circle cx="8" cy="8" r="6"/></svg></div>
-          <div class="ft-text"><div class="ft-title">AutoVuln</div><div class="ft-desc">IDENTIFY ·<br>Automated Vulnerability Assessment Engine</div></div>
-        </div>
-        <div class="proj-card s4">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#5a9fd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><path d="M9 11.5h5M11.5 9v5"/></svg></div>
-          <div class="ft-text"><div class="ft-title">SecureVault</div><div class="ft-desc">PROTECT ·<br>Hardened Cloud Credential Manager</div></div>
-        </div>
-        <div class="proj-card s1">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#e8824a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12l4-4 3 3 5-6"/><circle cx="14" cy="5" r="1.5" fill="#e8824a" stroke="none"/></svg></div>
-          <div class="ft-text"><div class="ft-title">ThreatLure</div><div class="ft-desc">DETECT ·<br>HoneyPot Threat Intelligence</div></div>
-        </div>
-        <div class="proj-card s1">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#e8824a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12l4-4 3 3 5-6"/><circle cx="14" cy="5" r="1.5" fill="#e8824a" stroke="none"/></svg></div>
-          <div class="ft-text"><div class="ft-title">SentinelOps</div><div class="ft-desc">DETECT ·<br>MITRE ATT&amp;CK Detection Engineering</div></div>
-        </div>
-        <div class="proj-card s3">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#a870e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg></div>
-          <div class="ft-text"><div class="ft-title">TriageAI</div><div class="ft-desc">RESPOND ·<br>AI-Assisted SOC Triage Pipeline</div></div>
-        </div>
-      </div>
+      <div class="portfolio-grid" data-project-group="soc"></div>
     </div>
 
     <div class="portfolio-group">
       <h2 class="pg-title">Cloud Security <span>— AWS</span></h2>
-      <div class="portfolio-grid">
-        <div class="proj-card s2">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#2aafaf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4l2.5 2.5"/><circle cx="8" cy="8" r="6"/></svg></div>
-          <div class="ft-text"><div class="ft-title">CISProbe</div><div class="ft-desc">IDENTIFY ·<br>CIS Compliance Engine</div></div>
-        </div>
-        <div class="proj-card s4">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#5a9fd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><path d="M9 11.5h5M11.5 9v5"/></svg></div>
-          <div class="ft-text"><div class="ft-title">S3Shield</div><div class="ft-desc">PROTECT ·<br>S3 Auto-Remediation System</div></div>
-        </div>
-        <div class="proj-card s1">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#e8824a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12l4-4 3 3 5-6"/><circle cx="14" cy="5" r="1.5" fill="#e8824a" stroke="none"/></svg></div>
-          <div class="ft-text"><div class="ft-title">TrailSIEM</div><div class="ft-desc">DETECT ·<br>CloudTrail Threat Detection</div></div>
-        </div>
-        <div class="proj-card s3">
-          <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#a870e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg></div>
-          <div class="ft-text"><div class="ft-title">IRZero</div><div class="ft-desc">RESPOND ·<br>Serverless IR Automation</div></div>
-        </div>
-      </div>
+      <div class="portfolio-grid" data-project-group="cloud"></div>
     </div>
+
+    <!-- Project cards are rendered by JS from a single data source (see
+         bottom of page) to avoid keeping two hand-written copies in sync.
+         This noscript block keeps the project list as real, crawlable
+         HTML for non-JS clients. -->
+    <noscript>
+      <div class="portfolio-group">
+        <h2 class="pg-title">SOC <span>Operations</span></h2>
+        <ul>
+          <li>PhishLens — Serverless IR Automation</li>
+          <li>BlueCell — Home SOC Lab, Wazuh SIEM Attack Simulation</li>
+          <li>ThreatPulse — Multi-Source Threat Intelligence Dashboard</li>
+          <li>AutoVuln — Automated Vulnerability Assessment Engine</li>
+          <li>SecureVault — Hardened Cloud Credential Manager</li>
+          <li>ThreatLure — HoneyPot Threat Intelligence</li>
+          <li>SentinelOps — MITRE ATT&amp;CK Detection Engineering</li>
+          <li>TriageAI — AI-Assisted SOC Triage Pipeline</li>
+        </ul>
+      </div>
+      <div class="portfolio-group">
+        <h2 class="pg-title">Cloud Security <span>— AWS</span></h2>
+        <ul>
+          <li>CISProbe — CIS Compliance Engine</li>
+          <li>S3Shield — S3 Auto-Remediation System</li>
+          <li>TrailSIEM — CloudTrail Threat Detection</li>
+          <li>IRZero — Serverless IR Automation</li>
+        </ul>
+      </div>
+    </noscript>
   </div>
 </section>
 
@@ -1034,20 +1007,82 @@ h1 em::after{
 </div>
 
 <script>
+/* ── PROJECT DATA — single source of truth, rendered into both the
+   desktop hero panel and the below-hero mobile/tablet section, so a
+   new project only needs to be added in one place. Icon + accent
+   color are derived from the NIST-style phase (DETECT/IDENTIFY/
+   PROTECT/RESPOND), since every project in this set pairs one-to-one
+   with a phase. ── */
+const PHASE_STYLE = {
+  DETECT:   { cls: 's1', color: '#e8824a', icon: 'check' },
+  IDENTIFY: { cls: 's2', color: '#2aafaf', icon: 'clock' },
+  PROTECT:  { cls: 's4', color: '#5a9fd4', icon: 'grid' },
+  RESPOND:  { cls: 's3', color: '#a870e8', icon: 'hourglass' },
+};
+const ICON_PATHS = {
+  check:     c => `<path d="M2 12l4-4 3 3 5-6"/><circle cx="14" cy="5" r="1.5" fill="${c}" stroke="none"/>`,
+  clock:     () => `<path d="M8 2v4l2.5 2.5"/><circle cx="8" cy="8" r="6"/>`,
+  grid:      () => `<rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><path d="M9 11.5h5M11.5 9v5"/>`,
+  hourglass: () => `<circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/>`,
+};
+const PROJECT_GROUPS = {
+  soc: [
+    ['RESPOND',  'PhishLens',    'Serverless IR Automation'],
+    ['DETECT',   'BlueCell',     'Home SOC Lab, Wazuh SIEM Attack Simulation'],
+    ['IDENTIFY', 'ThreatPulse',  'Multi-Source Threat Intelligence Dashboard'],
+    ['IDENTIFY', 'AutoVuln',     'Automated Vulnerability Assessment Engine'],
+    ['PROTECT',  'SecureVault',  'Hardened Cloud Credential Manager'],
+    ['DETECT',   'ThreatLure',   'HoneyPot Threat Intelligence'],
+    ['DETECT',   'SentinelOps',  'MITRE ATT&amp;CK Detection Engineering'],
+    ['RESPOND',  'TriageAI',     'AI-Assisted SOC Triage Pipeline'],
+  ],
+  cloud: [
+    ['IDENTIFY', 'CISProbe',   'CIS Compliance Engine'],
+    ['PROTECT',  'S3Shield',   'S3 Auto-Remediation System'],
+    ['DETECT',   'TrailSIEM',  'CloudTrail Threat Detection'],
+    ['RESPOND',  'IRZero',     'Serverless IR Automation'],
+  ],
+};
+
+function projectCardHTML([phase, title, desc]) {
+  const st = PHASE_STYLE[phase];
+  const iconSvg = ICON_PATHS[st.icon](st.color);
+  return `<div class="proj-card ${st.cls}">
+    <div class="ft-icon"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="${st.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconSvg}</svg></div>
+    <div class="ft-text"><div class="ft-title">${title}</div><div class="ft-desc">${phase} ·<br>${desc}</div></div>
+  </div>`;
+}
+
+document.querySelectorAll('[data-project-group]').forEach(grid => {
+  const items = PROJECT_GROUPS[grid.dataset.projectGroup];
+  if (items) grid.innerHTML = items.map(projectCardHTML).join('');
+});
+
+/* ── HERO PORTFOLIO FADE CUE — only shown when the panel actually
+   overflows, so it never implies there's more content when there
+   isn't. Re-checked on resize since the 1000px/1280px breakpoints
+   change how much fits. ── */
+(function () {
+  const scroller = document.getElementById('hpScroll');
+  const fade = document.getElementById('hpFade');
+  if (!scroller || !fade) return;
+
+  function updateFade() {
+    const overflowing = scroller.scrollHeight > scroller.clientHeight + 1;
+    const atBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
+    fade.classList.toggle('visible', overflowing && !atBottom);
+  }
+  scroller.addEventListener('scroll', updateFade, { passive: true });
+  window.addEventListener('resize', updateFade);
+  updateFade();
+})();
+
 /* ── SPLASH SCREEN SEQUENCE — runs independent of GSAP so it never breaks ── */
 (function () {
   const splash = document.getElementById('splash');
   if (!splash) return;
-  document.body.style.overflow = 'hidden';
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const t1 = reduced ? 80  : 200;   /* 1) icon + TM fades/slides in */
-  const t2 = reduced ? 120 : 700;   /* 2) "NERO VOXX" wordmark fades/slides in */
-  const t3 = reduced ? 160 : 1200;  /* 3) slogan fades/slides in */
-  const t4 = reduced ? 200 : 1650;  /* loading-bar track appears */
-  const t5 = reduced ? 240 : 1850;  /* loading-bar starts filling */
-  const fillDuration = reduced ? 300 : 1800; /* must match .splash-loadbar-fill transition */
-  const exitAt = t5 + fillDuration; /* exit begins the instant the bar finishes */
+  function restoreScroll() { document.body.style.overflow = ''; }
 
   function startHeroReveal() {
     if (window.__startHeroReveal) window.__startHeroReveal();
@@ -1061,19 +1096,59 @@ h1 em::after{
     }
   }
 
-  requestAnimationFrame(() => {
-    setTimeout(() => splash.classList.add('step-1'), t1);
-    setTimeout(() => splash.classList.add('step-2'), t2);
-    setTimeout(() => splash.classList.add('step-3'), t3);
-    setTimeout(() => splash.classList.add('step-4'), t4);
-    setTimeout(() => splash.classList.add('step-5'), t5);
-    setTimeout(() => {
-      splash.classList.add('splash-exit');
-      document.body.style.overflow = '';
-      startHeroReveal();
-      setTimeout(() => splash.remove(), 650);
-    }, exitAt);
-  });
+  /* Returning visitor within the same session (e.g. checking back on
+     launch progress): skip the ~2.5s intro entirely instead of
+     replaying it every visit. sessionStorage is scoped to this tab
+     and clears when it's closed, so first-time visitors each session
+     still get the full intro. */
+  let seenAlready = false;
+  try { seenAlready = sessionStorage.getItem('nv-splash-seen') === '1'; } catch (e) { /* storage blocked — fall through to normal intro */ }
+
+  if (seenAlready) {
+    splash.remove();
+    startHeroReveal();
+    return;
+  }
+  try { sessionStorage.setItem('nv-splash-seen', '1'); } catch (e) { /* ignore — worst case it replays next time */ }
+
+  // Safety net: if anything below throws, never leave the page stuck
+  // unscrollable behind a splash the user can't get past.
+  try {
+    document.body.style.overflow = 'hidden';
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const t1 = reduced ? 80  : 200;   /* 1) icon + TM fades/slides in */
+    const t2 = reduced ? 120 : 700;   /* 2) "NERO VOXX" wordmark fades/slides in */
+    const t3 = reduced ? 160 : 1200;  /* 3) slogan fades/slides in */
+    const t4 = reduced ? 200 : 1650;  /* loading-bar track appears */
+    const t5 = reduced ? 240 : 1850;  /* loading-bar starts filling */
+    const fillDuration = reduced ? 300 : 1800; /* must match .splash-loadbar-fill transition */
+    const exitAt = t5 + fillDuration; /* exit begins the instant the bar finishes */
+
+    requestAnimationFrame(() => {
+      try {
+        setTimeout(() => splash.classList.add('step-1'), t1);
+        setTimeout(() => splash.classList.add('step-2'), t2);
+        setTimeout(() => splash.classList.add('step-3'), t3);
+        setTimeout(() => splash.classList.add('step-4'), t4);
+        setTimeout(() => splash.classList.add('step-5'), t5);
+        setTimeout(() => {
+          splash.classList.add('splash-exit');
+          restoreScroll();
+          startHeroReveal();
+          setTimeout(() => splash.remove(), 650);
+        }, exitAt);
+      } catch (err) {
+        restoreScroll();
+        startHeroReveal();
+        splash.remove();
+      }
+    });
+  } catch (err) {
+    restoreScroll();
+    startHeroReveal();
+    splash.remove();
+  }
 })();
 
 window.addEventListener('DOMContentLoaded', () => {
