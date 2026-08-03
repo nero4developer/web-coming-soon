@@ -58,6 +58,10 @@ html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
   --rule:#2a2e38;
   --muted:#9aa0b3;
   --surface:#161a22;
+  /* Single source of truth for the left/right edge inset from ≥900px up —
+     used by both main's padding and .hero-portfolio's right offset, so
+     the two sides of the layout can't drift out of sync with each other. */
+  --edge-gutter:42px;
 }
 
 /* ── SKIP LINK — hidden until focused, sits above the splash (z-index 9999) ── */
@@ -256,14 +260,16 @@ main{
   z-index:1;
 }
 @media(min-width:600px){main{padding:110px 40px 80px}}
-@media(min-width:900px){main{padding:120px 40px 80px}}
+@media(min-width:900px){main{padding-top:120px;padding-left:var(--edge-gutter);padding-right:var(--edge-gutter);padding-bottom:80px}}
 @media(min-width:1000px){main{padding-right:600px}}
-@media(min-width:1280px){main{padding: 120px 42px 80px}}
+@media(min-width:1280px){main{padding-right:660px;padding-left:var(--edge-gutter)}}
+/* Note: no width cap at ultra-wide — the 42px edge gutter (--edge-gutter)
+   stays constant at every screen size by design, matching the tighter
+   look preferred at medium widths rather than growing on large monitors. */
 /* Past ~1600px the fixed padding-right leaves an ever-growing dead
    gap between the hero text and the portfolio panel. Capping and
    centering main keeps the two halves visually balanced instead of
    pinned left/right on ultra-wide monitors. */
-@media(min-width:1600px){main{max-width:1760px;}}
 
 /* ── HERO TYPE ── */
 .eyebrow{
@@ -408,48 +414,27 @@ h1 em::after{
 .ft-title{font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
 .ft-desc{font-size:11.5px;color:var(--muted);line-height:1.4}
 
-/* ── HERO PORTFOLIO PANEL — desktop only, right side of hero ── */
+/* ── HERO PORTFOLIO PANEL — desktop only, right side of hero ──
+   No height cap / internal scroll: the panel is taller than the
+   viewport once all 12 cards render, so it flows naturally as part
+   of the page (matching how the mobile/tablet section already
+   behaves) instead of being squeezed into an artificial 84vh box
+   with a nested scrollbar. Anchored from the top rather than
+   vertically centered — centering only makes sense when content is
+   shorter than the viewport; once it's taller, translateY(-50%)
+   pushes the top of the panel above the visible area. */
 .hero-portfolio{display:none}
 @media(min-width:1000px){
   .hero-portfolio{
     display:block;
-    position:absolute;right:56px;top:50%;
-    transform:translateY(-50%);
+    position:absolute;right:var(--edge-gutter);top:150px;
     width:520px;
-    max-height:84vh;
-    /* outer wrapper no longer scrolls itself — see .hp-scroll — so the
-       fade indicator below can sit fixed over the scrollable content */
-    overflow:hidden;
   }
   /* below-hero full section becomes redundant once the hero panel shows everything */
   .portfolio{display:none}
 }
 @media(min-width:1280px){.hero-portfolio{width:560px}}
 
-/* Scrollable inner: a visible (not hidden) thin scrollbar so it's clear
-   there's more to see, plus room on the right so the thumb doesn't sit
-   on top of card content. */
-.hp-scroll{
-  max-height:84vh;
-  overflow-y:auto;
-  overflow-x:hidden;
-  padding-right:6px;
-  scrollbar-width:thin;
-  scrollbar-color:var(--rule) transparent;
-}
-.hp-scroll::-webkit-scrollbar{width:6px}
-.hp-scroll::-webkit-scrollbar-track{background:transparent}
-.hp-scroll::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px}
-.hp-scroll::-webkit-scrollbar-thumb:hover{background:var(--muted)}
-
-/* Fade cue at the bottom of the panel — only shown (via JS) when the
-   content actually overflows, so it doesn't lie about there being more. */
-.hp-fade{
-  position:absolute;left:0;right:6px;bottom:0;height:44px;
-  background:linear-gradient(to bottom,transparent,var(--paper) 88%);
-  pointer-events:none;opacity:0;transition:opacity .2s ease;
-}
-.hp-fade.visible{opacity:1}
 .hp-label{
   font-family:'DM Mono',monospace;
   font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
@@ -929,20 +914,17 @@ h1 em::after{
 
   <!-- HERO PORTFOLIO PANEL — desktop only, right side of hero (all 12 projects) -->
   <div class="hero-portfolio" id="heroPortfolio">
-    <div class="hp-scroll" id="hpScroll">
-      <div class="hp-label">// Portfolio — 12 Projects</div>
+    <div class="hp-label">// Portfolio — 12 Projects</div>
 
-      <div class="hp-group">
-        <div class="hp-title">SOC <span>Operations</span></div>
-        <div class="hp-grid" data-project-group="soc"></div>
-      </div>
-
-      <div class="hp-group">
-        <div class="hp-title">Cloud Security <span>— AWS</span></div>
-        <div class="hp-grid" data-project-group="cloud"></div>
-      </div>
+    <div class="hp-group">
+      <div class="hp-title">SOC <span>Operations</span></div>
+      <div class="hp-grid" data-project-group="soc"></div>
     </div>
-    <div class="hp-fade" id="hpFade" aria-hidden="true"></div>
+
+    <div class="hp-group">
+      <div class="hp-title">Cloud Security <span>— AWS</span></div>
+      <div class="hp-grid" data-project-group="cloud"></div>
+    </div>
   </div>
 </main>
 
@@ -1061,23 +1043,35 @@ document.querySelectorAll('[data-project-group]').forEach(grid => {
   if (items) grid.innerHTML = items.map(projectCardHTML).join('');
 });
 
-/* ── HERO PORTFOLIO FADE CUE — only shown when the panel actually
-   overflows, so it never implies there's more content when there
-   isn't. Re-checked on resize since the 1000px/1280px breakpoints
-   change how much fits. ── */
+/* ── BOTTOM CLEARANCE FOR HERO-PORTFOLIO —
+   .hero-portfolio is position:absolute and no longer height-capped, so
+   its bottom edge can extend past the document's natural flow height.
+   .bottom-bar is position:fixed, meaning it always sits glued to the
+   viewport's bottom edge regardless of scroll position — with no
+   buffer, scrolling to the true end of the page would leave the last
+   row of cards permanently hidden behind it with nowhere further to
+   scroll. This pads the document so there's always real scroll room
+   to clear the fixed bar. ── */
 (function () {
-  const scroller = document.getElementById('hpScroll');
-  const fade = document.getElementById('hpFade');
-  if (!scroller || !fade) return;
+  const hp = document.getElementById('heroPortfolio');
+  const mainEl = document.querySelector('main');
+  if (!hp || !mainEl) return;
+  const BOTTOM_BAR_CLEARANCE = 46 + 32; /* bar height + comfortable gap */
 
-  function updateFade() {
-    const overflowing = scroller.scrollHeight > scroller.clientHeight + 1;
-    const atBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
-    fade.classList.toggle('visible', overflowing && !atBottom);
+  function ensureClearance() {
+    document.body.style.paddingBottom = '';
+    if (getComputedStyle(hp).display === 'none') return;
+    const hpBottomInDoc = hp.getBoundingClientRect().bottom + window.scrollY;
+    /* main's own bottom edge is the document's true flow-only height —
+       document.documentElement.scrollHeight isn't usable as a baseline
+       here since it already folds in hero-portfolio's own overflow. */
+    const flowBottomInDoc = mainEl.getBoundingClientRect().bottom + window.scrollY;
+    const needed = (hpBottomInDoc + BOTTOM_BAR_CLEARANCE) - flowBottomInDoc;
+    if (needed > 0) document.body.style.paddingBottom = Math.ceil(needed) + 'px';
   }
-  scroller.addEventListener('scroll', updateFade, { passive: true });
-  window.addEventListener('resize', updateFade);
-  updateFade();
+  window.addEventListener('load', ensureClearance);
+  window.addEventListener('resize', ensureClearance);
+  ensureClearance();
 })();
 
 /* ── SPLASH SCREEN SEQUENCE — runs independent of GSAP so it never breaks ── */
