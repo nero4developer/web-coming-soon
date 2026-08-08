@@ -273,15 +273,14 @@ main{
 @media(min-width:600px){main{padding:110px 40px 80px}}
 @media(min-width:900px){main{padding-top:120px;padding-left:var(--edge-gutter);padding-right:var(--edge-gutter);padding-bottom:80px}}
 @media(min-width:1200px){main{padding-right:600px}}
-@media(min-width:1280px){main{padding-right:660px;padding-left:var(--edge-gutter)}}
+@media(min-width:1280px){main{padding-right:985px;padding-left:var(--edge-gutter)}}
 /* FIX APPLIED: main previously had no width cap at ultra-wide, so the
-   42px edge gutter + fixed 660px right padding left an ever-growing
+   42px edge gutter + fixed right padding left an ever-growing
    dead gap between the hero text and the portfolio panel on large
-   screens. Capped and centered at 1420px to match Shopify's own
-   measured container width (div.container, 1420 x 568.33). */
+   screens. Capped and centered at 1520px. */
 @media(min-width:1420px){
   main{
-    max-width:1420px;
+    max-width:1520px;
     margin:0 auto;
   }
 }
@@ -533,6 +532,14 @@ h1 em::after{
 }
 @media(min-width:600px){.bottom-bar{padding:0 40px}}
 @media(min-width:900px){.bottom-bar{padding:0 42px}}
+/* FIX APPLIED: .bottom-bar is position:fixed against the viewport, but
+   main is capped+centered at 1520px past 1420px wide. A flat px value
+   here would only line up at one exact browser width, so the gutter is
+   computed relative to how much wider the viewport is than the 1520px
+   container (matches main's own centering math). */
+@media(min-width:1420px){
+  .bottom-bar{padding:0 calc((100vw - 1520px) / 2 + 49px)}
+}
 @media(max-width:599px){
   .bottom-bar{
     flex-direction:column;
@@ -576,6 +583,12 @@ h1 em::after{
   display:none;opacity:0;
 }
 @media(min-width:900px){.corner-text{display:block}}
+/* FIX APPLIED: same reasoning as .bottom-bar above — right offset
+   computed relative to the viewport/container gap instead of a fixed
+   px value, so it stays aligned with main's edge at any width. */
+@media(min-width:1420px){
+  .corner-text{right:calc((100vw - 1520px) / 2 + 49px)}
+}
 @media(max-width:899px){
   .corner-text{
     display:block;
