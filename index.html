@@ -364,6 +364,15 @@ h1 em::after{
   font-size:clamp(28px,7vw,42px);
   font-weight:900;line-height:1;margin-bottom:6px;
   will-change:transform;/* GSAP tick */
+  /* FIX APPLIED: Playfair Display's digits aren't monospaced by default —
+     "1" is narrower than "8" etc. — so every second, as the countdown
+     digits change, .cd-num's rendered text width shifts by a couple px.
+     Since .cd-unit only has a min-width (a floor, not a cap) and main's
+     align-items:flex-start makes it shrink-wrap to content, that jitter
+     was propagating up into the whole content column's width. Forcing
+     tabular (fixed-width) numeral glyphs removes the jitter at the
+     source instead of guessing a hardcoded box width. */
+  font-variant-numeric:tabular-nums;
 }
 .cd-unit:nth-child(1) .cd-num{color:var(--s2)}
 .cd-unit:nth-child(2) .cd-num{color:var(--s4)}
