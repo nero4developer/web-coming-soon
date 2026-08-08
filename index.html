@@ -205,10 +205,18 @@ nav{
   height:80px;
   background:rgba(10,13,18,.93);
   border-bottom:1px solid var(--rule);
-  display:flex;align-items:center;justify-content:space-between;
   padding:0 24px;
   z-index:100;
   /* backdrop-filter is expensive on low-end — only on desktop */
+}
+/* Bar itself stays full-bleed (like Shopify's nav background); the
+   logo + badge row inside is capped at 1420px and centered so it
+   lines up with the hero container above instead of pinning to the
+   viewport edges on ultra-wide screens. */
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  max-width:1420px;height:100%;
+  margin:0 auto;
 }
 @media(min-width:600px){
   nav{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:0 40px;}
@@ -216,10 +224,13 @@ nav{
 @media(max-width:599px){
   nav{
     backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    height:auto;
+    padding:12px 16px;
+  }
+  .nav-inner{
     flex-direction:column;
     justify-content:center;
     height:auto;
-    padding:12px 16px;
     gap:6px;
   }
   .nav-logo{justify-content:center;width:100%}
@@ -263,13 +274,17 @@ main{
 @media(min-width:900px){main{padding-top:120px;padding-left:var(--edge-gutter);padding-right:var(--edge-gutter);padding-bottom:80px}}
 @media(min-width:1200px){main{padding-right:600px}}
 @media(min-width:1280px){main{padding-right:660px;padding-left:var(--edge-gutter)}}
-/* Note: no width cap at ultra-wide — the 42px edge gutter (--edge-gutter)
-   stays constant at every screen size by design, matching the tighter
-   look preferred at medium widths rather than growing on large monitors. */
-/* Past ~1600px the fixed padding-right leaves an ever-growing dead
-   gap between the hero text and the portfolio panel. Capping and
-   centering main keeps the two halves visually balanced instead of
-   pinned left/right on ultra-wide monitors. */
+/* FIX APPLIED: main previously had no width cap at ultra-wide, so the
+   42px edge gutter + fixed 660px right padding left an ever-growing
+   dead gap between the hero text and the portfolio panel on large
+   screens. Capped and centered at 1420px to match Shopify's own
+   measured container width (div.container, 1420 x 568.33). */
+@media(min-width:1420px){
+  main{
+    max-width:1420px;
+    margin:0 auto;
+  }
+}
 
 /* ── HERO TYPE ── */
 .eyebrow{
@@ -721,6 +736,7 @@ h1 em::after{
 
 <!-- NAV -->
 <nav id="nav">
+ <div class="nav-inner">
   <div class="nav-logo">
     <svg class="nav-logo-mark" viewBox="0 0 1143.59 258.05" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NeroVoxx">
 <g id="Nero_Voxx_-_Logo"></g>
@@ -879,6 +895,7 @@ h1 em::after{
 </svg>
   </div>
   <div class="nav-badge">Portfolio · April 2027</div>
+ </div>
 </nav>
 
 <!-- MAIN -->
